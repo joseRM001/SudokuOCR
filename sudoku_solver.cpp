@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <iostream>
 #include <array>
-#include <math.h>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -77,6 +76,17 @@ class Sudoku {
         return true;
     }
 
+    std::optional<std::tuple<unsigned, unsigned>> find_next_hole() {
+        for (unsigned int i {  }; i < N; ++i) {
+            for (unsigned int j {  }; j < N; ++j) {
+                if (pMt[i][j] == EMPTY) {
+                    return std::make_tuple(i, j);
+                }
+            }
+        }
+        return std::nullopt;
+    }
+
     public:
     Sudoku(Matrix& contents) {
         if (!sudoku_values_in_range(contents)) {
@@ -109,16 +119,7 @@ class Sudoku {
         return true;
     }
 
-    std::optional<std::tuple<unsigned, unsigned>> find_next_hole() {
-        for (unsigned int i {  }; i < N; ++i) {
-            for (unsigned int j {  }; j < N; ++j) {
-                if (pMt[i][j] == EMPTY) {
-                    return std::make_tuple(i, j);
-                }
-            }
-        }
-        return std::nullopt;
-    }
+
 
     void backtrack(unsigned n, unsigned current_row, unsigned current_col) {
         if (std::all_of(pMt.begin(), pMt.end(), 
