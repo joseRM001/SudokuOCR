@@ -1,7 +1,7 @@
 import numpy as np
 import cv2 as cv
 
-img = cv.imread('/home/jose/Descargas/sudoku.png')
+img = cv.imread('sudoku2.png')
 assert img is not None, "file coud not be read"
 
 gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -43,9 +43,32 @@ for line in lines:
     if theta == 0:
         cv.line(img, (x1,y1), (x2,y2),(0,0,255),2)
     else:
-        cv.line(img, (x1,y1), (x2,y2),(0,255, 00),2)
+        cv.line(img, (x1,y1), (x2,y2),(0,255,0),2)
 
 ####
+
+red = np.array([0, 0, 255])
+green = np.array([0, 255, 0])
+gx0, gy0, w = 0,0, 0
+
+for i, j in np.ndindex(img.shape[:-1]):
+    if np.array_equal(green, img[i,j]):
+        gx0, gy0 = i, j
+        break
+
+for i in range(gx0, img.shape[0]):
+    for j in range(gy0, img.shape[1]):
+        w += 1
+        if np.array_equal(red, img[i,j]):        
+            break
+    break
+
+print(w)
+
+cv.line(img, (gx0, gy0), (gx0 + w, gy0), (255, 0, 0), 4)
+cv.line(img, (gx0+w, gy0), (gx0 + w, gy0 + w), (255, 0, 0), 4)
+cv.line(img, (gx0, gy0), (gx0, gy0 + w), (255, 0, 0), 4)
+cv.line(img, (gx0, gy0 + w), (gx0 + w, gy0 + w), (255, 0, 0), 4)
 
 
 # min_area = 1400
