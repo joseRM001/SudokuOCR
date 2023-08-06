@@ -41,9 +41,9 @@ for line in lines:
     x2 = int(x0 - 1000*(-b))
     y2 = int(y0 - 1000*(a))
     if theta == 0:
-        cv.line(img, (x1,y1), (x2,y2),(0,0,255),2)
+        cv.line(img, (x1,y1), (x2,y2),(0,0,255),1)
     else:
-        cv.line(img, (x1,y1), (x2,y2),(0,255,0),2)
+        cv.line(img, (x1,y1), (x2,y2),(0,255,0),1)
 
 ####
 
@@ -65,11 +65,19 @@ for i in range(gx0, img.shape[0]):
 
 print(w)
 
-cv.line(img, (gx0, gy0), (gx0 + w, gy0), (255, 0, 0), 4)
-cv.line(img, (gx0+w, gy0), (gx0 + w, gy0 + w), (255, 0, 0), 4)
-cv.line(img, (gx0, gy0), (gx0, gy0 + w), (255, 0, 0), 4)
-cv.line(img, (gx0, gy0 + w), (gx0 + w, gy0 + w), (255, 0, 0), 4)
 
+cv.line(img, (gx0, gy0), (gx0 + w, gy0), (255, 0, 0), 1)
+cv.line(img, (gx0+w, gy0), (gx0 + w, gy0 + w), (255, 0, 0), 1)
+cv.line(img, (gx0, gy0), (gx0, gy0 + w), (255, 0, 0), 1)
+cv.line(img, (gx0, gy0 + w), (gx0 + w, gy0 + w), (255, 0, 0), 1)
+
+for row in range(1, 9):
+
+    for i in range(1, 9):
+        cv.rectangle(img, (gx0 + (i*w), gy0 + (row*w)), (gx0 + (i*w) + w, gy0 + row*w + w), (255, 0, 0), 1)
+        cv.imshow('img', img)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
 
 # min_area = 1400
 # max_area = 2000
