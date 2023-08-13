@@ -13,21 +13,6 @@ def get_centeroid(cnt):
     sum_y = np.sum(cnt[..., 1])
     return int(sum_x / length), int(sum_y / length)
 
-def get_centers(img):
-    contours, hierarchies = cv.findContours(img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
-    for cnt in contours:
-        if cv.contourArea(cnt) > 100:
-            yield get_centeroid(cnt)
-
-
-
-def get_rows(img, centers, row_amt, row_h):
-    centers = np.array(centers)
-    d = row_h / row_amt
-    for i in range(row_amt):
-        f = centers[:, 1] - d * i
-        a = centers[(f < d) & (f > 0)]
-        yield a[a.argsort(0)[:, 0]]
 
 img = cv.imread('sudoku.png', cv.IMREAD_COLOR)
 assert img is not None, "file could not be read"
@@ -84,13 +69,12 @@ grid = grid[y:y+h, x:x+w]
 contours, hier = cv.findContours(grid, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 cv.drawContours(img, contours, 1, (255, 255, 0), 5)
 count = 0
-for i in range(1, len(contours)):
+for i in range(1, len(contours)): # contour[0] is the external contour, we are interested in the internal contours
     cnt = contours[i]
-    if cv.contourArea(cnt) > 42*42:
-        x, y = get_centeroid(cnt)
-        cv.circle(img, (x, y), 10, (0, 0, 255), -1)
-        count += 1
-        cv.putText(img, str(count), (x-10, y+5), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 255), 1)
+    x, y = get_centeroid(cnt)
+    cv.circle(img, (x, y), 10, (0, 0, 255), -1)
+    count += 1
+    cv.putText(img, str(count), (x-10, y+5), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 255), 1)
     
 # centers = list(get_centers(grid))
 # h, w = grid.shape
