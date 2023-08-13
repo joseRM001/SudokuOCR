@@ -123,7 +123,7 @@ template <unsigned N>
 void Sudoku<N>::backtrack(unsigned n, unsigned current_row, unsigned current_col) {
     if (std::all_of(sdk.begin(), sdk.end(), 
     [](const auto& v) { return std::all_of(v.begin(), v.end(), [](auto x) { return x != EMPTY; }); })) {
-        throw std::runtime_error("uwu");
+        throw std::runtime_error("");
     }
     sdk[current_row][current_col] = n;
     if (!check_if_valid()) {
