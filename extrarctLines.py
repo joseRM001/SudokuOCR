@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+import math
 
 def show_img(str, img):
     cv.imshow(str, img)
@@ -14,7 +15,7 @@ def get_centeroid(cnt):
     return int(sum_x / length), int(sum_y / length)
 
 
-img = cv.imread('sudoku.png', cv.IMREAD_COLOR)
+img = cv.imread('sudoku2.png', cv.IMREAD_COLOR)
 assert img is not None, "file could not be read"
 
 
@@ -67,15 +68,27 @@ grid = grid[y:y+h, x:x+w]
 
 
 contours, hier = cv.findContours(grid, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-cv.drawContours(img, contours, 1, (255, 255, 0), 5)
+
 count = 0
+cnts = []
 for i in range(1, len(contours)): # contour[0] is the external contour, we are interested in the internal contours
     cnt = contours[i]
     x, y = get_centeroid(cnt)
     cv.circle(img, (x, y), 10, (0, 0, 255), -1)
     count += 1
     cv.putText(img, str(count), (x-10, y+5), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 255), 1)
+    cnts.append(cv.boundingRect(cnt))
     
+#cnts = sorted(cnts, key=lambda data:math.sqrt(data[0]**2 + data[1]**2))
+cnts = sorted(cnts, key=lambda data:data[1])
+cnts = sorted(cnts, key=lambda data:data[0])
+
+for i in range(0, len(cnts)):
+    x, y, w, h = cnts[i]
+    cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+    show_img("img", img)
+
+
 # centers = list(get_centers(grid))
 # h, w = grid.shape
 # count = 0
@@ -88,7 +101,6 @@ for i in range(1, len(contours)): # contour[0] is the external contour, we are i
 # 
 
 
-show_img("img", img)
 
 
 #result = cv.subtract(bw, result2)
