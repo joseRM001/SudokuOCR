@@ -58,14 +58,22 @@ vertical = cv.dilate(vertical, vertical_SR)
 
 
 grid = cv.add(vertical, horizontal)
-contours, hier = cv.findContours(grid, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-x, y, w, h = cv.boundingRect(contours[0])
 
 ###### CROP
+contours, _ = cv.findContours(grid, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE) 
+x, y, w, h = cv.boundingRect(contours[0])
+
 bw = bw[y:y+h, x:x+w]
 img = img[y:y+h, x:x+w]
 grid = grid[y:y+h, x:x+w]
 ######
+
+############## GRID LINES
+lines = cv.HoughLinesP(grid, 1, np.pi/180, 50, None, 50, 10)
+for line in lines:
+    l = line[0]
+    cv.line(grid, (l[0], l[1]), (l[2], l[3]), (255, 255, 255), 5)
+##############
 
 
 contours, hier = cv.findContours(grid, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -92,5 +100,3 @@ for i in range(0, len(cnts)):
     n += 1
     # cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2) # DEBUG
 
-
-show_img("img", img)
