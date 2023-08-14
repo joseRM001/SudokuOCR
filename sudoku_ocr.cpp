@@ -1,26 +1,31 @@
-#include "tesseract/include/tesseract/baseapi.h"
-#include "leptonica/allheaders.h"
-int main() {
-     char *outText;
+#include <leptonica/allheaders.h>
+#include <tesseract/baseapi.h>
+#include <iostream>
+#include <string>
+#include <format>
+#include <sys/types.h> // DELETE
+#include <dirent.h> // DELETE
+#include <filesystem>
+#include <algorithm>
 
-    tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
-    // Initialize tesseract-ocr with English, without specifying tessdata path
-    if (api->Init(NULL, "eng")) {
-        fprintf(stderr, "Could not initialize tesseract.\n");
-        exit(1);
+const std::string PATH { "cells" };
+
+
+
+unsigned count_files_in_directory(const std::string& path) {
+    const std::filesystem::path dir_path{ path };
+    unsigned i {};
+    for (auto const& dir_entry : std::filesystem::directory_iterator{dir_path}) {
+        std::cout << dir_entry.path() << "\n";
+        ++i;
     }
+    return i;
+}
 
-    Pix *image = pixRead("/usr/src/tesseract/testing/phototest.tif");
-    api->SetImage(image);
-    // Get OCR result
-    outText = api->GetUTF8Text();
-    printf("OCR output:\n%s", outText);
-
-    // Destroy used object and release memory
-    api->End();
-    delete api;
-    delete [] outText;
-    pixDestroy(&image);
+int main() {
+    std::cout << count_files_in_directory(PATH) << std::endl;
+    PIX *pixs, *pixd;
+   
 
     return 0;
 }
