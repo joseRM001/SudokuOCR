@@ -32,7 +32,16 @@ int main() {
     }
 
     Pix *image;
-    for (unsigned i {1}; i <= sudoku_size; ++i) {
+   /* for (unsigned i {1}; n <= 9; i += 9) {
+        
+
+        if (i % 9 == 0) {
+            std::cout << "\n";
+        }
+    }*/
+
+    unsigned i {1};
+    while (n <= 9) {
         std::string filename = std::format("{}/Cell_{}.png", PATH, i);
         image = pixRead(filename.c_str());
         api->SetImage(image);
@@ -44,10 +53,13 @@ int main() {
         }
         pixDestroy(&image);
 
-        if (i % 9 == 0) {
+        i += 9;
+        if (i > sudoku_size) {
             std::cout << "\n";
+            i = ++n;
         }
     }
+
 
 
 
@@ -55,7 +67,5 @@ int main() {
     // FREEING RESOURCES
     api->End();
     delete api;
-    //delete[] outText;
-    //pixDestroy(&image);
     return 0;
 }
