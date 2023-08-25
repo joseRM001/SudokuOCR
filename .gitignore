@@ -34,5 +34,6 @@
 .venv/
 cmake-build-debug/
 .idea/
-*.png
+cells/
 .vscode
+CMakeLists.txt
