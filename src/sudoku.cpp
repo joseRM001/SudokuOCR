@@ -2,26 +2,39 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
-#include <array>
+#include <vector>
 #include <memory>
 #include <optional>
 #include <stdexcept>
 #include <tuple>
 #include <unordered_map>
 #include "sudoku.hpp"
+#include "sudoku_exception.hpp"
 
-template <unsigned N>
-bool Sudoku<N>::value_in_range(unsigned x) noexcept { 
-    return (x == EMPTY) || (x >= MIN && x <= MAX); 
+
+bool Sudoku::sudoku_values_in_range() const noexcept  { 
+    for (const std::vector<unsigned>& row : sdk) {
+        for (unsigned x : row) {
+            if (!(x == EMPTY || (x >= MIN && x <= MAX))) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
-template <unsigned N>
-bool Sudoku<N>::sudoku_values_in_range(const Matrix& sudoku) noexcept { 
-    return std::all_of(sudoku.begin(), sudoku.end(), [](std::array<unsigned, N> row) { return std::all_of(row.begin(), row.end(), value_in_range); }); 
+bool Sudoku::sudoku_completed() const noexcept {
+    for (const std::vector<unsigned>& row : sdk) {
+        for (unsigned x : row) {
+            if (x == EMPTY) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
-template <unsigned N>
-bool Sudoku<N>::unique_values_in_row(const std::array<unsigned, N>& row) const noexcept{
+bool Sudoku::unique_values_in_row(const std::vector<unsigned>& row) const noexcept{
       if (!row.size()) {
          return false;
      }
@@ -38,8 +51,8 @@ bool Sudoku<N>::unique_values_in_row(const std::array<unsigned, N>& row) const n
      return true;
 }
 
-template <unsigned N>
-bool Sudoku<N>::unique_values_in_col(const Matrix& mt, unsigned nth_col) const noexcept {
+
+bool Sudoku::unique_values_in_col(const Matrix& mt, unsigned nth_col) const noexcept {
     std::unordered_map<unsigned, unsigned> ltb;
     for (unsigned int i {}; i < N; ++i) {
         if (mt[i][nth_col] == EMPTY) {
@@ -53,8 +66,8 @@ bool Sudoku<N>::unique_values_in_col(const Matrix& mt, unsigned nth_col) const n
     return true;
 }
 
-template <unsigned N>
-bool Sudoku<N>::unique_values_in_region(const Matrix& mt, unsigned row, unsigned col) const noexcept{
+
+bool Sudoku::unique_values_in_region(const Matrix& mt, unsigned row, unsigned col) const noexcept{
     unsigned start_row { (row / REGION_SIZE) * REGION_SIZE };
     unsigned start_col { (col / REGION_SIZE) * REGION_SIZE };
     unsigned end_row { start_row + REGION_SIZE };
@@ -62,7 +75,6 @@ bool Sudoku<N>::unique_values_in_region(const Matrix& mt, unsigned row, unsigned
     std::unordered_map<unsigned, unsigned> ltb;
     for (unsigned int i { start_row }; i < end_row; ++i) {
         for (unsigned int j { start_col }; j < end_col; j = ++j) {
-            //std::cout << mt[i][j] << " ";
             if (mt[i][j] == EMPTY) {
                 continue;
             }
@@ -71,13 +83,12 @@ bool Sudoku<N>::unique_values_in_region(const Matrix& mt, unsigned row, unsigned
             }
             ltb[mt[i][j]] = 1;
             }
-            //std::cout << "\n";
         }
     return true;
 }
 
-template <unsigned N>
-std::optional<std::tuple<unsigned, unsigned>> Sudoku<N>::find_next_hole() const {
+
+std::optional<std::tuple<unsigned, unsigned>> Sudoku::find_next_hole() const {
     for (unsigned int i {  }; i < N; ++i) {
         for (unsigned int j {  }; j < N; ++j) {
             if (sdk[i][j] == EMPTY) {
@@ -88,16 +99,16 @@ std::optional<std::tuple<unsigned, unsigned>> Sudoku<N>::find_next_hole() const 
     return std::nullopt;
 }
 
-template <unsigned N>
-Sudoku<N>::Sudoku(Matrix& contents) {
-    if (!sudoku_values_in_range(contents)) {
+
+Sudoku::Sudoku(Matrix& contents) : N(contents.size()){
+    if (!sudoku_values_in_range()) {
         throw std::runtime_error("Sudoku values are not valid");
     }
     sdk = contents;
 }
 
-template <unsigned N>
-bool Sudoku<N>::check_if_valid()  {
+
+bool Sudoku::check_if_valid()  {
     for (const auto& row : sdk) {
         if (!unique_values_in_row(row)) {
             return false;
@@ -119,14 +130,14 @@ bool Sudoku<N>::check_if_valid()  {
     return true;
 }
 
-template <unsigned N>
-void Sudoku<N>::backtrack(unsigned n, unsigned current_row, unsigned current_col) {
+
+void Sudoku::backtrack(unsigned n, unsigned current_row, unsigned current_col) {
     if (std::all_of(sdk.begin(), sdk.end(), 
-    [](const auto& v) { return std::all_of(v.begin(), v.end(), [](auto x) { return x != EMPTY; }); })) {
-        throw std::runtime_error("");
+    [&](const auto& v) { return std::all_of(v.begin(), v.end(), [&](auto x) { return x != EMPTY; }); })) {
+        throw sudoku_exception("sudoku finished");
     }
     sdk[current_row][current_col] = n;
-    if (!check_if_valid()) {
+    if (!(unique_values_in_row(sdk[current_row]) && unique_values_in_col(sdk, current_col) && unique_values_in_region(sdk, current_row, current_col))) {
         sdk[current_row][current_col] = EMPTY;
         return;
     }
@@ -143,8 +154,8 @@ void Sudoku<N>::backtrack(unsigned n, unsigned current_row, unsigned current_col
     sdk[current_row][current_col] = EMPTY;
 }
 
-template <unsigned N>
-void Sudoku<N>::solve() {
+
+void Sudoku::solve() {
     auto next_hole { find_next_hole() };
     if (next_hole == std::nullopt) {
         return;
@@ -154,12 +165,11 @@ void Sudoku<N>::solve() {
     for (unsigned int i {1}; i <= N; ++i) {
         backtrack(i, std::get<0>(next_hole.value()), std::get<1>(next_hole.value()));
     }
-    } catch(...) {
-    }
+    } catch(sudoku_exception& s) { }
 }
 
-template <unsigned N>
-const Sudoku<N>::Matrix& Sudoku<N>::get_matrix() {
+
+const Sudoku::Matrix& Sudoku::get_matrix() {
     return sdk;
 }
 
